@@ -61,6 +61,10 @@ define(['modules/core/src/NoteModel', 'utils/NoteUtils'], function(NoteModel, No
 		for (var i = 0, c = note.getNumPitches(); i < c; i++) {
 			noteObj.keys.push(note.getPitch(i));
 		}
+		// 渲染前进行排序
+		if (noteObj.keys.length > 1) {
+      noteObj.keys = NoteUtils.sortPitches(noteObj.keys)
+    }
 		noteObj.duration = note.duration;
 		//important only set property if not null, 
 		if (note.dot != null) noteObj.dot = note.dot;

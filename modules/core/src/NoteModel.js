@@ -132,6 +132,16 @@ define(['utils/NoteUtils'], function(NoteUtils) {
 		return this.octave[i];
 	};
 
+	// 删除复音
+	NoteModel.prototype.popPitchClass = function () {
+    if (this.pitchClass.length != 1) {
+      this.pitchClass.pop()
+      this.octave.pop()
+      this.accidental.pop()
+    }
+		return this.pitchClass.length
+  }
+
 	
 	/**
 	 * @param  {Number} index        

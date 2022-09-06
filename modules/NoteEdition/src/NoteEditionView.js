@@ -192,15 +192,25 @@ define([
 			$.publish('NoteEditionView', fn);
 		});
 
-		// Selection
-		$('#copy-note').click(function() {
-			fn = 'copyNotes';
-			$.publish('NoteEditionView', fn);
-		});
-		$('#paste-note').click(function() {
-			fn = 'pasteNotes';
-			$.publish('NoteEditionView', fn);
-		});
-	};
+    // Selection
+    // $('#copy-note').click(function () {
+    //   fn = 'copyNotes'
+    //   $.publish('NoteEditionView', fn)
+    // })
+    // $('#paste-note').click(function () {
+    //   fn = 'pasteNotes'
+    //   $.publish('NoteEditionView', fn)
+    // })
+
+    // Polyphony
+    $('#delete-pitch').click(function () {
+      fn = 'deletePolyphony'
+      $.publish('NoteEditionView', fn)
+    })
+    $('#add-pitch').click(function () {
+      fn = 'addPolyphony'
+      $.publish('NoteEditionView', fn)
+    })
+  };
 	return NoteEditionView;
 });

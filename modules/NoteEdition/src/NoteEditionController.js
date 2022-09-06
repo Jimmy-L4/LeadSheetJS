@@ -67,6 +67,12 @@ define([
         case 'pasteNotes':
           name = 'Paste notes'
           break
+        case 'addPolyphony':
+          name = 'Add polyphony'
+          break
+        case 'deletePolyphony':
+          name = 'Delete polyphony'
+          break
       }
       return name
     }
@@ -417,9 +423,10 @@ define([
 
       for (var i = 0; i < tmpNoteMng.getTotal(); i++) {
         note = tmpNoteMng.getNote(i)
+        let pitchNum = note.getNumPitches()  //防止复音情况，所以改变音高时改变复音中最后一个音
         if (!note.isRest) {
-          newKey = NoteUtils.getNextChromaticKey(note.getPitch(), decalOrNote)
-          note.setNoteFromString(newKey)
+          newKey = NoteUtils.getNextChromaticKey(note.getPitch(pitchNum-1), decalOrNote)
+          note.setNoteFromString(newKey,pitchNum-1)
         }
       }
       noteMng.notesSplice([start, end - 1], tmpNoteMng.getNotes())
@@ -433,19 +440,59 @@ define([
       var convertRestToNote = selNotes.length == 1
       for (var i = 0; i < selNotes.length; i++) {
         note = selNotes[i]
+        let pitchNum = note.getNumPitches()
         if (note.isRest && convertRestToNote) {
           note.setRest(false)
         }
         if (type == 'pitch') {
           //find closest key
-          newKey = NoteUtils.getClosestKey(note.getPitch(), decalOrNote)
-          note.setNoteFromString(newKey)
+          newKey = NoteUtils.getClosestKey(note.getPitch(pitchNum-1), decalOrNote)
+          note.setNoteFromString(newKey, pitchNum-1)
         } else if (!note.isRest) {
-          newKey = NoteUtils.getNextKey(note.getPitch(), decalOrNote) // decalOrNote is 1 or -1
-          note.setNoteFromString(newKey)
+          newKey = NoteUtils.getNextKey(note.getPitch(pitchNum-1), decalOrNote) // decalOrNote is 1 or -1
+          note.setNoteFromString(newKey, pitchNum-1)
         }
       }
     }
+  }
+
+
+  // Polyphony functions
+  /**
+   * 对当前选中的note添加一个高八度的复音
+   *  
+   */
+  NoteEditionController.prototype.addPolyphony = function (){
+    var self = this, note
+    var newKey
+    var selNotes = self._getSelectedNotes()
+    var convertRestToNote = selNotes.length == 1
+    for (var i = 0; i < selNotes.length; i++) {
+      note = selNotes[i]
+      let pitchNum = note.getNumPitches()
+      if (note.isRest && convertRestToNote) {
+        note.setRest(false)
+      }
+      //find closest key
+      newKey = NoteUtils.getNextKey(note.getPitch(pitchNum-1), 3)
+      note.setNoteFromString(newKey, pitchNum)
+    }
+  }
+
+/**
+   * 删除当前选中的note最后一个复音
+   */
+  NoteEditionController.prototype.deletePolyphony = function (){
+    var self = this, note
+    var selNotes = self._getSelectedNotes()
+    for (var i = 0; i < selNotes.length; i++) {
+      note = selNotes[i]
+      let pitchNum = note.getNumPitches()
+      if (!note.isRest && pitchNum != 1) {
+        let newPitchNum = note.popPitchClass()
+      }
+    }
+
   }
 
   NoteEditionController.prototype.transposeBy = function (interval, direction) {
@@ -464,11 +511,12 @@ define([
     }
     for (var i = 0; i < selNotes.length; i++) {
       note = selNotes[i]
+      let pitchNum = note.getNumPitches() //防止复音情况，所以改变升降符号时改变复音中最后一个音
       if (note.isRest) continue
-      if (note.getAccidental() == accidental) {
-        note.removeAccidental()
+      if (note.getAccidental(pitchNum - 1) == accidental) {
+        note.removeAccidental(pitchNum - 1)
       } else {
-        note.setAccidental(accidental)
+        note.setAccidental(accidental, pitchNum - 1)
       }
     }
   }
